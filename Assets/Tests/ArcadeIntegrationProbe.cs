@@ -120,10 +120,19 @@ public class ArcadeIntegrationProbe : MonoBehaviour
         Record("Main menu has three game choices and Exit", app.GameButtons.All(b => b != null && b.interactable) && app.ExitButton != null && app.ExitButton.interactable);
         var menuText = app.MainMenuRoot.GetComponentsInChildren<Text>().Select(t => t.text).ToArray();
         Record("Menu displays game title and correct author", menuText.Contains(GameCatalog.Title) && menuText.Any(t => t.Contains("Zwe Khant Lin") && t.Contains("6632710")));
+        Record("All three selection cards have classroom artwork", app.GameButtons.All(b => b.GetComponentInChildren<RawImage>().texture != null));
+        Record("All menu actions have animated keyboard and pointer feedback", app.GameButtons.Concat(new[] { app.ExitButton, app.ResumeButton, app.RestartButton, app.BackButton }).All(b => b.GetComponent<ArcadeMenuButton>() != null));
+        yield return CaptureMenu("main-1280x720", app.MainMenuRoot, 1280, 720);
+        yield return CaptureMenu("main-1440x900", app.MainMenuRoot, 1440, 900);
+        yield return CaptureMenu("main-1024x768", app.MainMenuRoot, 1024, 768);
         Keys(Key.DownArrow); yield return new WaitForSecondsRealtime(.1f); Keys(); yield return new WaitForSecondsRealtime(.05f);
         Record("Main menu Down selects second game", EventSystem.current.currentSelectedGameObject == app.GameButtons[1].gameObject);
         Keys(Key.UpArrow); yield return new WaitForSecondsRealtime(.1f); Keys(); yield return new WaitForSecondsRealtime(.05f);
         Record("Main menu Up selects first game", EventSystem.current.currentSelectedGameObject == app.GameButtons[0].gameObject);
+        Keys(Key.RightArrow); yield return new WaitForSecondsRealtime(.1f); Keys(); yield return new WaitForSecondsRealtime(.05f);
+        Record("Main menu Right selects second game", EventSystem.current.currentSelectedGameObject == app.GameButtons[1].gameObject);
+        Keys(Key.LeftArrow); yield return new WaitForSecondsRealtime(.1f); Keys(); yield return new WaitForSecondsRealtime(.05f);
+        Record("Main menu Left selects first game", EventSystem.current.currentSelectedGameObject == app.GameButtons[0].gameObject);
         for (int i = 0; i < 3; i++) {
             app.GameButtons[i].onClick.Invoke();
             yield return Loaded();
@@ -136,6 +145,9 @@ public class ArcadeIntegrationProbe : MonoBehaviour
             Record("Escape pauses game " + (i + 1), app.IsPaused && app.PauseRoot.activeSelf && Time.timeScale == 0 && AudioListener.pause);
             var pauseText = app.PauseRoot.GetComponentsInChildren<Text>().Select(t => t.text).ToArray();
             Record("Pause menu includes PAUSED and all three actions", pauseText.Contains("PAUSED") && pauseText.Contains("Resume") && pauseText.Contains("Restart") && pauseText.Contains("Back to Main Menu"));
+            Record("Pause menu identifies the active game " + (i + 1), pauseText.Any(t => t.Contains(GameCatalog.Titles[i].ToUpperInvariant())));
+            yield return CaptureMenu("pause-game-" + (i + 1) + "-1280x720", app.PauseRoot, 1280, 720);
+            if (i == 0) yield return CaptureMenu("pause-1024x768", app.PauseRoot, 1024, 768);
             Keys(Key.DownArrow); yield return new WaitForSecondsRealtime(.1f); Keys(); yield return new WaitForSecondsRealtime(.05f);
             Record("Pause Down selects Restart " + (i + 1), EventSystem.current.currentSelectedGameObject == app.RestartButton.gameObject);
             Keys(Key.UpArrow); yield return new WaitForSecondsRealtime(.1f); Keys(); yield return new WaitForSecondsRealtime(.05f);
@@ -173,6 +185,55 @@ public class ArcadeIntegrationProbe : MonoBehaviour
             app.PauseGame(); app.BackButton.onClick.Invoke(); yield return Loaded();
         }
         Record("Integration run ends at working Main Menu", app.IsMainMenu && app.MainMenuRoot.activeSelf);
+    }
+
+    private IEnumerator CaptureMenu(string name, GameObject root, int width, int height)
+    {
+        var canvas = root.GetComponentInParent<Canvas>();
+        var camera = Camera.main;
+        var originalMode = canvas.renderMode;
+        var originalCamera = canvas.worldCamera;
+        float originalDistance = canvas.planeDistance;
+        var originalTarget = camera.targetTexture;
+        var target = new RenderTexture(width, height, 24) { antiAliasing = 4 };
+        try {
+            camera.targetTexture = target;
+            canvas.renderMode = RenderMode.ScreenSpaceCamera;
+            canvas.worldCamera = camera;
+            canvas.planeDistance = camera.nearClipPlane + .1f;
+            yield return new WaitForSecondsRealtime(.15f);
+            Canvas.ForceUpdateCanvases();
+            var backdrop = root.GetComponentInChildren<ArcadeBackdrop>();
+            if (backdrop != null) {
+                var mesh = backdrop.canvasRenderer.GetMesh();
+                Record("Decorative background renders: " + name, mesh != null && mesh.vertexCount > 100,
+                    mesh == null ? "No mesh" : mesh.vertexCount + " vertices, " + mesh.bounds.size);
+            }
+            var canvasRect = ((RectTransform)canvas.transform).rect;
+            bool visible = root.GetComponentsInChildren<Button>().All(b => {
+                Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(canvas.transform, b.transform);
+                return bounds.min.x >= canvasRect.xMin - 1 && bounds.max.x <= canvasRect.xMax + 1 && bounds.min.y >= canvasRect.yMin - 1 && bounds.max.y <= canvasRect.yMax + 1;
+            });
+            Record("All actions fit viewport: " + name, visible);
+            var clipped = root.GetComponentsInChildren<Text>().Where(t => t.preferredHeight > t.rectTransform.rect.height + 1 || t.preferredWidth > t.rectTransform.rect.width + 1).Select(t => t.name).ToArray();
+            Record("Menu labels fit without clipping: " + name, clipped.Length == 0, string.Join(", ", clipped));
+            camera.Render();
+            var active = RenderTexture.active;
+            RenderTexture.active = target;
+            var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+            texture.ReadPixels(new Rect(0, 0, width, height), 0, 0); texture.Apply();
+            Directory.CreateDirectory("TestResults/MenuPreview");
+            File.WriteAllBytes("TestResults/MenuPreview/" + name + ".png", texture.EncodeToPNG());
+            RenderTexture.active = active;
+            Destroy(texture);
+        } finally {
+            canvas.renderMode = originalMode;
+            canvas.worldCamera = originalCamera;
+            canvas.planeDistance = originalDistance;
+            camera.targetTexture = originalTarget;
+            target.Release(); Destroy(target);
+        }
+        yield return null;
     }
     private void ClearClones()
     {

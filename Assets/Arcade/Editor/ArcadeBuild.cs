@@ -52,4 +52,28 @@ public static class ArcadeBuild
         File.WriteAllText("Build/build-result.txt", report.summary.result + "\nErrors: " + report.summary.totalErrors + "\nWarnings: " + report.summary.totalWarnings);
         if (Application.isBatchMode) EditorApplication.Exit(report.summary.result == BuildResult.Succeeded ? 0 : 1);
     }
+
+    [MenuItem("Arcade/Build Local Menu Preview")]
+    public static void BuildMenuPreview()
+    {
+        Prepare();
+        Directory.CreateDirectory("Build/Preview");
+        BuildReport report;
+        try {
+            PlayerSettings.productName = "Arcade Trio Preview";
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone, "com.zwekhantlin.arcadetrio.preview");
+            report = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
+                scenes = EditorBuildSettings.scenes.Select(s => s.path).ToArray(),
+                locationPathName = "Build/Preview/Arcade Trio Preview.app",
+                target = BuildTarget.StandaloneOSX,
+                options = BuildOptions.None
+            });
+        } finally {
+            PlayerSettings.productName = "Arcade Trio";
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone, "com.zwekhantlin.arcadetrio");
+            AssetDatabase.SaveAssets();
+        }
+        File.WriteAllText("Build/Preview/build-result.txt", report.summary.result + "\nErrors: " + report.summary.totalErrors + "\nWarnings: " + report.summary.totalWarnings);
+        if (Application.isBatchMode) EditorApplication.Exit(report.summary.result == BuildResult.Succeeded ? 0 : 1);
+    }
 }

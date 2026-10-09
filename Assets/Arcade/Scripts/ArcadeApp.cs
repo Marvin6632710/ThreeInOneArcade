@@ -34,11 +34,17 @@ namespace Arcade
         private GameObject loadingRoot;
         private Text hudTitle;
         private Text hudControls;
+        private Text pauseGameTitle;
+        private Image hudAccent;
         private Font font;
+        private Sprite roundedSprite;
         private static readonly Color Ink = new Color32(12, 19, 31, 255);
         private static readonly Color Surface = new Color32(24, 35, 51, 255);
-        private static readonly Color Accent = new Color32(202, 244, 103, 255);
+        private static readonly Color Accent = new Color32(172, 239, 193, 255);
         private static readonly Color Muted = new Color32(162, 180, 199, 255);
+        private static readonly Color[] GameAccents = {
+            new Color32(172, 239, 193, 255), new Color32(203, 188, 255, 255), new Color32(153, 212, 255, 255)
+        };
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -84,6 +90,9 @@ namespace Arcade
             if (CurrentGame >= 0) {
                 hudTitle.text = GameCatalog.Titles[CurrentGame].ToUpperInvariant();
                 hudControls.text = GameCatalog.Controls[CurrentGame];
+                hudAccent.color = GameAccents[CurrentGame];
+                pauseGameTitle.text = (CurrentGame + 1).ToString("00") + "  /  " + GameCatalog.Titles[CurrentGame].ToUpperInvariant();
+                pauseGameTitle.color = GameAccents[CurrentGame];
             }
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
@@ -106,7 +115,8 @@ namespace Arcade
         {
             var keyboard = Keyboard.current;
             if (keyboard == null || EventSystem.current == null) return;
-            int direction = keyboard.downArrowKey.wasPressedThisFrame ? 1 : keyboard.upArrowKey.wasPressedThisFrame ? -1 : 0;
+            int direction = keyboard.downArrowKey.wasPressedThisFrame || (IsMainMenu && keyboard.rightArrowKey.wasPressedThisFrame) ? 1
+                : keyboard.upArrowKey.wasPressedThisFrame || (IsMainMenu && keyboard.leftArrowKey.wasPressedThisFrame) ? -1 : 0;
             if (direction == 0) return;
             Button[] buttons = IsMainMenu ? new[] { GameButtons[0], GameButtons[1], GameButtons[2], ExitButton } : new[] { ResumeButton, RestartButton, BackButton };
             int selected = System.Array.FindIndex(buttons, b => b.gameObject == EventSystem.current.currentSelectedGameObject);
@@ -207,40 +217,61 @@ namespace Arcade
             var parent = canvasObject.transform;
 
             MainMenuRoot = Panel("Main Menu", parent, Ink);
-            Box("Top rule", MainMenuRoot.transform, new Rect(64, 50, 1152, 2), new Color32(61, 79, 98, 255));
-            Label("Edition", MainMenuRoot.transform, "CLASSROOM COLLECTION  /  2026", new Rect(64, 62, 600, 24), 14, Muted);
-            Label("Index", MainMenuRoot.transform, "03 GAMES · 01 ARCADE", new Rect(910, 62, 306, 24), 14, Muted, TextAnchor.MiddleRight);
-            Label("Title", MainMenuRoot.transform, GameCatalog.Title, new Rect(180, 111, 920, 90), 72, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
-            Label("Subtitle", MainMenuRoot.transform, "PICK YOUR NEXT PLAY.", new Rect(180, 203, 920, 28), 18, Accent, TextAnchor.MiddleCenter);
+            var backdrop = new GameObject("Arcade grid", typeof(RectTransform), typeof(ArcadeBackdrop));
+            backdrop.transform.SetParent(MainMenuRoot.transform, false);
+            var backdropRect = backdrop.GetComponent<RectTransform>();
+            backdropRect.anchorMin = Vector2.zero; backdropRect.anchorMax = Vector2.one;
+            backdropRect.offsetMin = backdropRect.offsetMax = Vector2.zero;
+            backdrop.GetComponent<ArcadeBackdrop>().raycastTarget = false;
+            RoundedBox("Brand badge", MainMenuRoot.transform, new Rect(56, 32, 44, 44), Accent);
+            Label("Monogram", MainMenuRoot.transform, "A/", new Rect(56, 32, 44, 44), 23, Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
+            Label("Edition", MainMenuRoot.transform, "THE CLASSROOM COLLECTION", new Rect(116, 36, 420, 36), 13, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            Label("Index", MainMenuRoot.transform, "CSX4515  /  FINAL 2026", new Rect(880, 36, 344, 36), 12, Muted, TextAnchor.MiddleRight);
+            Label("Title", MainMenuRoot.transform, GameCatalog.Title, new Rect(53, 104, 900, 78), 68, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            Label("Subtitle", MainMenuRoot.transform, "Three challenges. One place to play.", new Rect(59, 183, 780, 30), 20, Muted);
+            Label("Selection label", MainMenuRoot.transform, "CHOOSE YOUR GAME", new Rect(59, 232, 190, 26), 12, Accent, TextAnchor.MiddleLeft, FontStyle.Bold);
+            Box("Section rule", MainMenuRoot.transform, new Rect(242, 245, 982, 1), new Color32(46, 63, 82, 255));
             for (int i = 0; i < 3; i++) {
                 int game = i;
-                GameButtons[i] = Card("Game " + (i + 1), MainMenuRoot.transform, GameCatalog.Titles[i], GameCatalog.Descriptions[i], (i + 1).ToString("00"), new Rect(350, 268 + i * 88, 580, 72), () => PlayGame(game), false);
+                GameButtons[i] = GameCard(i, MainMenuRoot.transform, new Rect(56 + i * 396, 272, 376, 332), () => PlayGame(game));
             }
-            ExitButton = Card("Exit", MainMenuRoot.transform, "Exit", "CLOSE THE ARCADE", "×", new Rect(350, 544, 580, 64), ExitGame, false);
-            Label("Menu help", MainMenuRoot.transform, "MOUSE  select     ·     ↑ / ↓  navigate     ·     ENTER  play", new Rect(64, 662, 760, 28), 14, Muted);
-            Label("Author", MainMenuRoot.transform, "By " + GameCatalog.Author + "  ·  " + GameCatalog.StudentId, new Rect(700, 662, 516, 28), 15, Color.white, TextAnchor.MiddleRight);
+            Box("Footer rule", MainMenuRoot.transform, new Rect(56, 626, 1168, 1), new Color32(46, 63, 82, 255));
+            Label("Author caption", MainMenuRoot.transform, "CREATED BY", new Rect(59, 645, 420, 18), 10, Muted, TextAnchor.MiddleLeft, FontStyle.Bold);
+            Label("Author", MainMenuRoot.transform, GameCatalog.Author + "  /  " + GameCatalog.StudentId, new Rect(59, 666, 450, 24), 16, Color.white);
+            Label("Menu help", MainMenuRoot.transform, "ARROW KEYS  navigate   ·   ENTER  select   ·   MOUSE  click", new Rect(492, 650, 550, 36), 12, Muted, TextAnchor.MiddleCenter);
+            ExitButton = ActionButton("Exit", MainMenuRoot.transform, "Exit", "", "×", new Rect(1080, 646, 144, 44), ExitGame, false);
 
             hudRoot = Panel("Game HUD", parent, Color.clear, false);
-            Box("HUD shade", hudRoot.transform, new Rect(0, 0, 1280, 76), new Color32(12, 19, 31, 220));
-            hudTitle = Label("Game title", hudRoot.transform, "", new Rect(26, 9, 650, 28), 20, Accent, TextAnchor.MiddleLeft, FontStyle.Bold);
-            hudControls = Label("Controls", hudRoot.transform, "", new Rect(26, 38, 1050, 24), 15, Color.white);
-            Card("Pause", hudRoot.transform, "Pause  [ESC]", "", "", new Rect(1080, 15, 174, 44), PauseGame, true);
+            RoundedBox("HUD shade", hudRoot.transform, new Rect(24, 20, 750, 68), new Color32(12, 19, 31, 235));
+            hudAccent = Box("Game accent", hudRoot.transform, new Rect(24, 34, 3, 40), Accent);
+            hudTitle = Label("Game title", hudRoot.transform, "", new Rect(44, 28, 700, 26), 18, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            hudControls = Label("Controls", hudRoot.transform, "", new Rect(44, 56, 700, 22), 14, Muted);
+            ActionButton("Pause", hudRoot.transform, "Pause  [ESC]", "", "", new Rect(1098, 24, 158, 48), PauseGame, false);
 
             gameOverRoot = Panel("Game Over Hint", parent, Color.clear, false);
-            Box("Game over backdrop", gameOverRoot.transform, new Rect(300, 604, 680, 70), new Color32(12, 19, 31, 235));
-            Label("Game over message", gameOverRoot.transform, "GAME OVER  ·  Press ESC, then Restart to play again", new Rect(312, 613, 656, 50), 21, Accent, TextAnchor.MiddleCenter, FontStyle.Bold);
+            RoundedBox("Game over backdrop", gameOverRoot.transform, new Rect(300, 622, 680, 64), new Color32(12, 19, 31, 240));
+            Label("Game over message", gameOverRoot.transform, "GAME OVER  ·  Press ESC, then Restart to play again", new Rect(316, 630, 648, 48), 19, Accent, TextAnchor.MiddleCenter, FontStyle.Bold);
 
-            PauseRoot = Panel("In-Game Menu", parent, new Color32(7, 13, 23, 235));
-            Box("Pause accent", PauseRoot.transform, new Rect(603, 116, 74, 5), Accent);
-            Label("Paused", PauseRoot.transform, "PAUSED", new Rect(240, 149, 800, 95), 70, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
-            Label("Pause description", PauseRoot.transform, "TAKE A BREATHER. YOUR GAME IS RIGHT HERE.", new Rect(210, 242, 860, 30), 15, Muted, TextAnchor.MiddleCenter);
-            ResumeButton = Card("Resume", PauseRoot.transform, "Resume", "CONTINUE THIS RUN", "↗", new Rect(380, 308, 520, 72), ResumeGame, true);
-            RestartButton = Card("Restart", PauseRoot.transform, "Restart", "START THIS GAME FRESH", "↻", new Rect(380, 396, 520, 72), RestartGame, false);
-            BackButton = Card("Back to Main Menu", PauseRoot.transform, "Back to Main Menu", "CHOOSE ANOTHER GAME", "←", new Rect(380, 484, 520, 72), BackToMainMenu, false);
-            Label("Pause help", PauseRoot.transform, "ESC  resume     ·     ↑ / ↓  navigate     ·     ENTER  select", new Rect(240, 622, 800, 30), 15, Muted, TextAnchor.MiddleCenter);
+            PauseRoot = Panel("In-Game Menu", parent, new Color32(5, 10, 19, 168));
+            RoundedBox("Panel shadow", PauseRoot.transform, new Rect(330, 104, 620, 532), new Color32(0, 0, 0, 75));
+            RoundedBox("Panel border", PauseRoot.transform, new Rect(330, 92, 620, 532), new Color32(58, 76, 97, 255));
+            RoundedBox("Pause panel", PauseRoot.transform, new Rect(331, 93, 618, 530), new Color32(17, 27, 43, 255));
+            pauseGameTitle = Label("Pause game title", PauseRoot.transform, "", new Rect(382, 119, 516, 24), 12, Accent, TextAnchor.MiddleLeft, FontStyle.Bold);
+            Label("Paused", PauseRoot.transform, "PAUSED", new Rect(378, 148, 445, 70), 60, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            RoundedBox("Pause symbol left", PauseRoot.transform, new Rect(853, 169, 11, 32), Accent);
+            RoundedBox("Pause symbol right", PauseRoot.transform, new Rect(873, 169, 11, 32), Accent);
+            Label("Pause description", PauseRoot.transform, "Your run is on hold. Jump back in when you're ready.", new Rect(382, 220, 516, 30), 15, Muted);
+            RoundedBox("Paused status", PauseRoot.transform, new Rect(382, 264, 516, 38), new Color32(28, 42, 59, 255));
+            Label("Paused status text", PauseRoot.transform, "GAMEPLAY + AUDIO PAUSED", new Rect(396, 268, 488, 30), 11, Muted, TextAnchor.MiddleCenter, FontStyle.Bold);
+            ResumeButton = ActionButton("Resume", PauseRoot.transform, "Resume", "CONTINUE THIS RUN", "→", new Rect(382, 324, 516, 66), ResumeGame, true);
+            RestartButton = ActionButton("Restart", PauseRoot.transform, "Restart", "START THIS GAME FRESH", "↻", new Rect(382, 404, 516, 64), RestartGame, false);
+            BackButton = ActionButton("Back to Main Menu", PauseRoot.transform, "Back to Main Menu", "CHOOSE ANOTHER GAME", "←", new Rect(382, 482, 516, 64), BackToMainMenu, false);
+            Label("Pause help", PauseRoot.transform, "ESC  resume    ·    ↑ / ↓  navigate    ·    ENTER  select", new Rect(350, 572, 580, 30), 12, Muted, TextAnchor.MiddleCenter);
 
             loadingRoot = Panel("Loading", parent, Ink);
-            Label("Loading label", loadingRoot.transform, "LOADING YOUR NEXT PLAY…", new Rect(240, 300, 800, 100), 30, Accent, TextAnchor.MiddleCenter, FontStyle.Bold);
+            Label("Loading brand", loadingRoot.transform, GameCatalog.Title, new Rect(240, 280, 800, 80), 54, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+            Box("Loading accent", loadingRoot.transform, new Rect(600, 388, 80, 3), Accent);
+            Label("Loading label", loadingRoot.transform, "LOADING YOUR NEXT PLAY…", new Rect(240, 412, 800, 42), 14, Muted, TextAnchor.MiddleCenter);
             MainMenuRoot.SetActive(false); PauseRoot.SetActive(false); hudRoot.SetActive(false); gameOverRoot.SetActive(false); loadingRoot.SetActive(false);
         }
 
@@ -274,6 +305,83 @@ namespace Arcade
             return image;
         }
 
+        private Sprite RoundedSprite()
+        {
+            if (roundedSprite != null) return roundedSprite;
+            const int size = 64;
+            const float radius = 16;
+            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false) { name = "Arcade rounded panel", filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+            var pixels = new Color[size * size];
+            for (int y = 0; y < size; y++) for (int x = 0; x < size; x++) {
+                var point = new Vector2(x + .5f, y + .5f);
+                var nearest = new Vector2(Mathf.Clamp(point.x, radius, size - radius), Mathf.Clamp(point.y, radius, size - radius));
+                pixels[y * size + x] = new Color(1, 1, 1, Mathf.Clamp01(radius + .5f - Vector2.Distance(point, nearest)));
+            }
+            texture.SetPixels(pixels); texture.Apply(false, true);
+            roundedSprite = Sprite.Create(texture, new Rect(0, 0, size, size), new Vector2(.5f, .5f), 100, 0, SpriteMeshType.FullRect, new Vector4(radius, radius, radius, radius));
+            return roundedSprite;
+        }
+
+        private Image RoundedBox(string name, Transform parent, Rect bounds, Color color)
+        {
+            var image = Box(name, parent, bounds, color);
+            image.sprite = RoundedSprite(); image.type = Image.Type.Sliced;
+            return image;
+        }
+
+        private void TopLeft(RectTransform rect, Rect bounds)
+        {
+            rect.anchorMin = rect.anchorMax = new Vector2(0, 1);
+            rect.anchoredPosition = new Vector2(bounds.x, -bounds.y);
+        }
+
+        private Image LocalBox(string name, Transform parent, Rect bounds, Color color, bool rounded = false)
+        {
+            var image = rounded ? RoundedBox(name, parent, bounds, color) : Box(name, parent, bounds, color);
+            TopLeft(image.rectTransform, bounds);
+            return image;
+        }
+
+        private Button ButtonShell(string name, Transform parent, Rect bounds, Color accent, bool primary)
+        {
+            RoundedBox(name + " shadow", parent, new Rect(bounds.x, bounds.y + 6, bounds.width, bounds.height), new Color32(0, 0, 0, 45));
+            var border = RoundedBox(name, parent, bounds, new Color32(49, 65, 85, 255));
+            border.raycastTarget = true;
+            var fill = LocalBox("Surface", border.transform, new Rect(1, 1, bounds.width - 2, bounds.height - 2), primary ? accent : Surface, true);
+            var button = border.gameObject.AddComponent<Button>();
+            button.targetGraphic = border; button.transition = Selectable.Transition.None;
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            var feedback = border.gameObject.AddComponent<ArcadeMenuButton>();
+            feedback.Border = border; feedback.Background = fill; feedback.BaseColor = Surface; feedback.Accent = accent; feedback.Primary = primary;
+            return button;
+        }
+
+        private Button GameCard(int index, Transform parent, Rect bounds, UnityEngine.Events.UnityAction action)
+        {
+            var accent = GameAccents[index];
+            var button = ButtonShell("Game " + (index + 1), parent, bounds, accent, false);
+            button.onClick.AddListener(action);
+            var artFrame = LocalBox("Artwork mask", button.transform, new Rect(10, 10, bounds.width - 20, 180), Ink, true);
+            artFrame.gameObject.AddComponent<Mask>().showMaskGraphic = false;
+            var artwork = new GameObject("Classroom artwork", typeof(RectTransform), typeof(RawImage));
+            var artRect = Position(artwork, artFrame.transform, new Rect(0, 0, bounds.width - 20, 180));
+            TopLeft(artRect, new Rect(0, 0, bounds.width - 20, 180));
+            var raw = artwork.GetComponent<RawImage>();
+            raw.texture = Resources.Load<Texture2D>("MenuArt/" + new[] { "Dogs", "Balloon", "Arena" }[index]); raw.raycastTarget = false;
+            LocalBox("Index badge", button.transform, new Rect(24, 24, 40, 30), new Color32(12, 19, 31, 235), true);
+            LocalLabel("Number", button.transform, (index + 1).ToString("00"), new Rect(24, 24, 40, 30), 13, accent, TextAnchor.MiddleCenter, FontStyle.Bold);
+            string[] categories = { "REFLEX", "FLIGHT", "ARENA" };
+            LocalLabel("Category", button.transform, categories[index], new Rect(224, 24, 128, 30), 12, Color.white, TextAnchor.MiddleRight, FontStyle.Bold);
+            LocalLabel("Label", button.transform, GameCatalog.Titles[index], new Rect(24, 204, 332, 34), 25, Color.white, TextAnchor.MiddleLeft, FontStyle.Bold);
+            string[] descriptions = { "Send the dogs. Catch the falling balls.", "Collect cash. Keep clear of the bombs.", "Push your rivals out. Own the arena." };
+            LocalLabel("Description", button.transform, descriptions[index], new Rect(24, 243, 332, 24), 14, Muted);
+            LocalLabel("Challenge", button.transform, "CHALLENGE " + (index + 2), new Rect(24, 286, 180, 30), 11, Muted, TextAnchor.MiddleLeft, FontStyle.Bold);
+            var play = LocalBox("Play pill", button.transform, new Rect(220, 282, 132, 34), accent, true);
+            button.GetComponent<ArcadeMenuButton>().Action = play;
+            LocalLabel("Play label", button.transform, "PLAY GAME  →", new Rect(220, 282, 132, 34), 11, Ink, TextAnchor.MiddleCenter, FontStyle.Bold);
+            return button;
+        }
+
         private Text Label(string name, Transform parent, string value, Rect bounds, int size, Color color, TextAnchor alignment = TextAnchor.MiddleLeft, FontStyle style = FontStyle.Normal)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Text));
@@ -285,23 +393,17 @@ namespace Arcade
             return text;
         }
 
-        private Button Card(string name, Transform parent, string title, string subtitle, string number, Rect bounds, UnityEngine.Events.UnityAction action, bool primary)
+        private Button ActionButton(string name, Transform parent, string title, string subtitle, string symbol, Rect bounds, UnityEngine.Events.UnityAction action, bool primary)
         {
-            var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
-            Position(go, parent, bounds);
-            var image = go.GetComponent<Image>(); image.color = primary ? Accent : Surface;
-            var button = go.GetComponent<Button>(); button.targetGraphic = image;
-            var colors = button.colors;
-            colors.normalColor = Color.white; colors.highlightedColor = new Color32(222, 239, 196, 255);
-            colors.selectedColor = new Color32(216, 233, 193, 255); colors.pressedColor = new Color32(153, 185, 125, 255);
-            colors.fadeDuration = .08f; button.colors = colors;
+            var button = ButtonShell(name, parent, bounds, Accent, primary);
+            var go = button.gameObject;
             button.onClick.AddListener(action);
             Color titleColor = primary ? Ink : Color.white;
             if (subtitle.Length == 0) LocalLabel("Label", go.transform, title, new Rect(14, 2, bounds.width - 28, bounds.height - 4), 18, titleColor, TextAnchor.MiddleCenter, FontStyle.Bold);
             else {
-                LocalLabel("Number", go.transform, number, new Rect(20, 3, 46, bounds.height - 6), 25, primary ? Ink : Accent, TextAnchor.MiddleCenter, FontStyle.Bold);
-                LocalLabel("Label", go.transform, title, new Rect(84, 8, bounds.width - 104, 29), 24, titleColor, TextAnchor.MiddleLeft, FontStyle.Bold);
-                LocalLabel("Description", go.transform, subtitle, new Rect(84, 36, bounds.width - 104, 23), 12, primary ? new Color32(55, 74, 37, 255) : Muted);
+                LocalLabel("Label", go.transform, title, new Rect(22, 7, bounds.width - 96, 28), 22, titleColor, TextAnchor.MiddleLeft, FontStyle.Bold);
+                LocalLabel("Description", go.transform, subtitle, new Rect(23, 36, bounds.width - 98, 18), 10, primary ? new Color32(37, 73, 53, 255) : Muted, TextAnchor.MiddleLeft, FontStyle.Bold);
+                LocalLabel("Symbol", go.transform, symbol, new Rect(bounds.width - 58, 3, 36, bounds.height - 6), 25, primary ? Ink : Accent, TextAnchor.MiddleCenter, FontStyle.Bold);
             }
             return button;
         }
@@ -309,8 +411,7 @@ namespace Arcade
         private Text LocalLabel(string name, Transform parent, string value, Rect bounds, int size, Color color, TextAnchor alignment = TextAnchor.MiddleLeft, FontStyle style = FontStyle.Normal)
         {
             var text = Label(name, parent, value, bounds, size, color, alignment, style);
-            text.rectTransform.anchorMin = text.rectTransform.anchorMax = new Vector2(0, 1);
-            text.rectTransform.anchoredPosition = new Vector2(bounds.x, -bounds.y);
+            TopLeft(text.rectTransform, bounds);
             return text;
         }
     }
