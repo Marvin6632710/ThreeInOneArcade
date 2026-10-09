@@ -6,7 +6,7 @@ Keep the existing continuous screen recording running. This checklist is for the
 
 1. In GitHub Desktop, show this project's changed source/assets and the final commit description.
 2. Commit the completed project.
-3. Publish/push `gdd-final-three-in-one-6632710` to GitHub as a public repository.
+3. Publish/push `Marvin6632710/ThreeInOneArcade` to GitHub as a public repository: https://github.com/Marvin6632710/ThreeInOneArcade.
 4. Open the repository page and show the uploaded source and final commit. Keep the actual repository URL for submission.
 
 ## Demonstrate every marked feature
