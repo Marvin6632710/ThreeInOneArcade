@@ -1,0 +1,553 @@
+{
+    "project": "Arcade Trio",
+    "mode": "combined integration",
+    "passed": true,
+    "checks": [
+        {
+            "name": "Main camera exists",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene has no missing scripts",
+            "passed": true,
+            "detail": "0"
+        },
+        {
+            "name": "Main menu is the starting scene",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Main menu has three game choices and Exit",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Menu displays game title and correct author",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Main menu Down selects second game",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Main menu Up selects first game",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Game button loads playable scene 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Merged scene 1 has no missing scripts",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "One shared controller and event system in game 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Dog and all ball prefabs assigned",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Balls spawn automatically",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Spawned balls fall toward the play area",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Forward input moves player",
+            "passed": true,
+            "detail": "(13.00, 0.00, 0.00)"
+        },
+        {
+            "name": "Player stays within upper movement boundary",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Player stays within lower boundary and depth plane",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Space launches a dog",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Launched dog runs left",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Dog catches and removes ball through real trigger collision",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Missed balls are cleaned up",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Offscreen dogs are cleaned up",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape pauses game 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause menu includes PAUSED and all three actions",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause Down selects Restart 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause Up selects Resume 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Gameplay input scripts suspended during pause 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause freezes physics and prevents Space gameplay 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Resume button restores time audio and controls 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Restart reloads current game 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Back button returns from game 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Main menu gravity reset after game 1",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Game button loads playable scene 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Merged scene 2 has no missing scripts",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "One shared controller and event system in game 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Balloon physics and obstacle prefabs assigned",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Bombs or money spawn automatically",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Lift force raises balloon",
+            "passed": true,
+            "detail": "(-3.00, 8.59, 0.00)"
+        },
+        {
+            "name": "Balloon obeys height ceiling",
+            "passed": true,
+            "detail": "(-3.00, 12.99, 0.00)"
+        },
+        {
+            "name": "Balloon falls when lift is released",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Ground bounce keeps balloon in play",
+            "passed": true,
+            "detail": "(-3.00, 1.95, 0.00)"
+        },
+        {
+            "name": "Collecting money removes it without ending game",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Bomb collision ends game and removes bomb",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scrolling and spawning stop after game over",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape pauses game 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause menu includes PAUSED and all three actions",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause Down selects Restart 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause Up selects Resume 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Gameplay input scripts suspended during pause 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause freezes physics and prevents Space gameplay 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Resume button restores time audio and controls 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Restart reloads current game 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Restart clears balloon game-over state",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Back button returns from game 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Main menu gravity reset after game 2",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Game button loads playable scene 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Merged scene 3 has no missing scripts",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "One shared controller and event system in game 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "First enemy wave and powerup spawn",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Enemy advances toward player goal",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Forward input moves arena player",
+            "passed": true,
+            "detail": "(0.00, 0.00, -6.12)"
+        },
+        {
+            "name": "Steering rotates camera focal point",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Space turbo applies forward impulse",
+            "passed": true,
+            "detail": "(12.35, 0.00, 7.65)"
+        },
+        {
+            "name": "Powerup pickup activates stronger knockback and indicator",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Powerup expires and hides indicator",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Clearing wave spawns two enemies",
+            "passed": true,
+            "detail": "2"
+        },
+        {
+            "name": "Later waves increase enemy speed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Player collision knocks enemy away",
+            "passed": true,
+            "detail": "(9.47, -0.02, 0.00)"
+        },
+        {
+            "name": "Enemy reaching goal is removed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape pauses game 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause menu includes PAUSED and all three actions",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause Down selects Restart 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause Up selects Resume 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Gameplay input scripts suspended during pause 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Pause freezes physics and prevents Space gameplay 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Resume button restores time audio and controls 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Restart reloads current game 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Restart resets arena to first wave",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Back button returns from game 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Main menu gravity reset after game 3",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has correct physics: Fly Like a Balloon",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has one menu controller",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape toggles pause and resume",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has correct physics: Sumo Ball Arena",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has one menu controller",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape toggles pause and resume",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has correct physics: Dog Patrol",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has one menu controller",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape toggles pause and resume",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has correct physics: Sumo Ball Arena",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Repeated entry has one menu controller",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Escape toggles pause and resume",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Scene transition completed",
+            "passed": true,
+            "detail": ""
+        },
+        {
+            "name": "Integration run ends at working Main Menu",
+            "passed": true,
+            "detail": ""
+        }
+    ],
+    "errors": []
+}
